@@ -13,6 +13,7 @@ set -uo pipefail
 HOST_HOME="${HOME}"
 CUSTOM_MODULES="${HOST_HOME}/.local/share/ii-custom/qs-modules"
 II_DIR="${HOST_HOME}/.config/quickshell/ii"
+RESTORE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/restore"
 
 fail() { echo "[ii-custom] ERROR: $1"; exit 1; }
 
@@ -100,7 +101,35 @@ else:
 PY
 }
 
+apply_booru() {
+    # Whole-file restoration for heavily customized ii files (wallpaper search).
+    # Wipe detection: live copy compared against the upstream clone reference.
+    local custom="${RESTORE_DIR}/Booru.qml"
+    local live="${II_DIR}/services/Booru.qml"
+    local upstream="${HOST_HOME}/.cache/dots-hyprland/dots/.config/quickshell/ii/services/Booru.qml"
+
+    [[ -f "${custom}" ]] || { echo "[ii-custom] SKIP: ${custom} missing"; return 0; }
+    [[ -f "${live}" ]] || { echo "[ii-custom] SKIP: ${live} missing (upstream layout changed?)"; return 0; }
+
+    if cmp -s "${live}" "${custom}"; then
+        echo "[ii-custom] OK: Booru.qml already customized"
+        return 0
+    fi
+
+    if [[ -f "${upstream}" ]] && cmp -s "${live}" "${upstream}"; then
+        cp "${custom}" "${live}"
+        echo "[ii-custom] Restored Booru.qml customization (update wiped it)"
+        return 0
+    fi
+
+    echo "[ii-custom] SKIP: Booru.qml diverged from both repo copy and upstream reference — manual merge needed"
+    echo "[ii-custom]   live:     ${live}"
+    echo "[ii-custom]   repo:     ${custom}"
+    echo "[ii-custom]   upstream: ${upstream}"
+}
+
 echo "[ii-custom] Re-applying external quickshell modules..."
 apply_family
 apply_lock
+apply_booru
 echo "[ii-custom] Done. If the shell is running, reload it: touch ~/.config/quickshell/ii/shell.qml"
