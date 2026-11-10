@@ -1,0 +1,40 @@
+# MyDotFilesAdditions (hypr-dots)
+
+Личные поверх end-4/dots-hyprland (illogical-impulse), переносимые на другие машины.
+
+## Структура
+
+- `update.sh` — обновление базовых дотфейтов: бэкап `~/.config` → git pull `~/.cache/dots-hyprland` → инсталляция → реапплай кастом-модулей.
+- `reapply-custom.sh` — восстанавливает интеграционные строки кастомных модулей в файлах illogical-impulse (идемпотентно, якоря с SKIP-защитой от апстрим-изменений).
+- `setup-ii-custom.sh` — деплой кастом-модулей на машину: GNU stow пакета `ii-custom` + реапплай + перезагрузка шелла.
+- `ii-custom/` — stow-пакет, зеркалит `$HOME`:
+  - `.local/share/ii-custom/qs-modules/KeyboardLayoutOsd.qml` — OSD смены раскладки (полупрозрачный квадрат внизу экрана: код + язык, 1.5 с).
+  - `.local/share/ii-custom/qs-modules/LockClock.qml` — большие часы на экране блокировки.
+
+После stow: `~/.local/share/ii-custom/qs-modules` — симлинк в репо, значит **правки делаются прямо в репо**.
+
+## Новая машина
+
+```bash
+git clone git@github.com:1-Holopsicon-1/MyDotFilesAdditions.git ~/hypr-dots
+sudo pacman -S stow          # если ещё нет
+~/hypr-dots/update.sh        # ставит базовые доты (end-4) и восстанавливает интеграцию
+~/hypr-dots/setup-ii-custom.sh
+```
+
+## Ежедневные правки
+
+1. Редактируешь `ii-custom/.local/share/ii-custom/qs-modules/*.qml` (в репо).
+2. `touch ~/.config/quickshell/ii/shell.qml` — быстрый reload.
+3. Коммить как обычно.
+
+## Нюансы
+
+- Интеграция состоит из тонких вставок в `panelFamilies/IllogicalImpulseFamily.qml`
+  и `modules/ii/lock/LockSurface.qml` — их апдейтер затирает, `reapply-custom.sh`
+  возвращает (update.sh делает это автоматически).
+- quickshell не принимает абсолютный путь в QML-импорте — только `file:` URL.
+- После изменения самой симлинк-раскладки (миграции) нужен полный рестарт шелла:
+  `qs kill -c ii && qs -c ii` — reload кеш движка пересматривает не всегда.
+- Позиция кастомных элементов задаётся в самих модулях (KeyboardLayoutOsd — блок
+  `anchors` у `osdSquare`; LockClock — `anchors.centerIn` в корне компонента).
