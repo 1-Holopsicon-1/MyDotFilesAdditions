@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import qs.modules.common
 import qs.services
 import Quickshell;
+import Quickshell.Io;
 import QtQuick;
 
 /**
@@ -378,15 +379,25 @@ Singleton {
         })]
     }
 
+    // Provider credentials live OUTSIDE this repo, in a file that the shell never rewrites
+    FileView {
+        id: providerCredsFile
+        path: `${Quickshell.env("HOME")}/.config/illogical-impulse/booru-creds.json`
+        watchChanges: false
+    }
+    readonly property var providerCreds: {
+        try {
+            return JSON.parse(providerCredsFile.text())
+        } catch (e) {
+            return ({})
+        }
+    }
+
     function appendAuthParams(provider, params) {
-        const rule34Config = Config.options?.sidebar?.booru?.rule34
-        if (currentProvider === "rule34") {
-            const apiKey = rule34Config?.apiKey
-            const userId = rule34Config?.userId
-            if (apiKey && userId) {
-                params.push("api_key=" + encodeURIComponent(apiKey))
-                params.push("user_id=" + encodeURIComponent(userId))
-            }
+        const creds = root.providerCreds?.[currentProvider]
+        if (creds?.apiKey && creds?.userId) {
+            params.push("api_key=" + encodeURIComponent(creds.apiKey))
+            params.push("user_id=" + encodeURIComponent(creds.userId))
         }
     }
 
