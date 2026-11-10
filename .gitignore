@@ -1,0 +1,6 @@
+config-backup-*/
+dots-hyprland-backup*/
+
+# editor/system noise
+*.swp
+.directory
