@@ -22,6 +22,19 @@ sudo pacman -S stow          # если ещё нет
 ~/hypr-dots/setup-ii-custom.sh
 ```
 
+### Только кастом (без обновления базовых дотфейтов)
+
+Если на машине доты end-4 уже установлены и обновлять их не нужно — достаточно:
+
+```bash
+git clone git@github.com:1-Holopsicon-1/MyDotFilesAdditions.git ~/hypr-dots
+sudo pacman -S stow          # если ещё нет
+~/hypr-dots/setup-ii-custom.sh
+```
+
+Требования: `~/.config/quickshell/ii` существует (базовые доты стоят), stow установлен.
+Если после деплоя OSD/часы не появились — один раз полный рестарт шелла: `qs kill -c ii && qs -c ii`.
+
 ## Ежедневные правки
 
 1. Редактируешь `ii-custom/.local/share/ii-custom/qs-modules/*.qml` (в репо).
