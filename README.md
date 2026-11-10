@@ -17,7 +17,6 @@
 
 ```bash
 git clone git@github.com:1-Holopsicon-1/MyDotFilesAdditions.git ~/hypr-dots
-sudo pacman -S stow          # если ещё нет
 ~/hypr-dots/update.sh        # ставит базовые доты (end-4) и восстанавливает интеграцию
 ~/hypr-dots/setup-ii-custom.sh
 ```
@@ -28,11 +27,11 @@ sudo pacman -S stow          # если ещё нет
 
 ```bash
 git clone git@github.com:1-Holopsicon-1/MyDotFilesAdditions.git ~/hypr-dots
-sudo pacman -S stow          # если ещё нет
 ~/hypr-dots/setup-ii-custom.sh
 ```
 
-Требования: `~/.config/quickshell/ii` существует (базовые доты стоят), stow установлен.
+Требования: `~/.config/quickshell/ii` существует (базовые доты стоят). GNU stow
+установится автоматически (pacman/apt/dnf; спросит пароль sudo, если не хватает).
 Если после деплоя OSD/часы не появились — один раз полный рестарт шелла: `qs kill -c ii && qs -c ii`.
 
 ## Ежедневные правки

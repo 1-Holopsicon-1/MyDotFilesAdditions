@@ -9,10 +9,24 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RUNTIME_DIR="${HOME}/.local/share/ii-custom"
 SHELL_ENTRY="${HOME}/.config/quickshell/ii/shell.qml"
 
-command -v stow >/dev/null || {
-    echo "[ii-custom] GNU stow not found. Install it first: sudo pacman -S stow"
-    exit 1
-}
+# Ensure GNU stow is available, installing it if missing
+if ! command -v stow >/dev/null 2>&1; then
+    echo "[ii-custom] GNU stow not found, installing..."
+    if command -v pacman >/dev/null 2>&1; then
+        sudo pacman -S --needed --noconfirm stow || {
+            echo "[ii-custom] ERROR: pacman failed to install stow (password/rights issue?)"
+            exit 1
+        }
+    elif command -v apt-get >/dev/null 2>&1; then
+        sudo apt-get install -y stow || { echo "[ii-custom] ERROR: apt failed to install stow"; exit 1; }
+    elif command -v dnf >/dev/null 2>&1; then
+        sudo dnf install -y stow || { echo "[ii-custom] ERROR: dnf failed to install stow"; exit 1; }
+    else
+        echo "[ii-custom] ERROR: no known package manager (pacman/apt/dnf); install GNU stow manually"
+        exit 1
+    fi
+fi
+echo "[ii-custom] stow: $(stow --version | head -1)"
 
 # Migrate stale pre-stow runtime layout (was a real dir duplicating repo files)
 if [[ -e "${RUNTIME_DIR}" && ! -L "${RUNTIME_DIR}" ]]; then
